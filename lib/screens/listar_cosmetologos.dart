@@ -1,35 +1,16 @@
+import 'package:consumir_api/models/cosmetologo.model.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart'
-    as http;
+import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-class Cosmetologo {
-  final String nombre;
-  final String avatar;
-
-  Cosmetologo({required this.nombre, required this.avatar});
-
-  factory Cosmetologo.fromJson(Map<String, dynamic> json) {
-    return Cosmetologo(
-      nombre: json['nombre'],
-      avatar: json['avatar']
-    );
-  }
-}
-
 Future<List<Cosmetologo>> fetchPostsCosmetologo() async {
-  final response = await http.get(
-    Uri.parse('https://proyecto-horarios.onrender.com/cosmetologos'),
-  );
+  final response = await http
+      .get(Uri.parse('https://proyecto-horarios.onrender.com/cosmetologos'));
 
   if (response.statusCode == 200) {
-    // Parsea el cuerpo de la respuesta a un objeto JSON
     Map<String, dynamic> jsonData = json.decode(response.body);
-
-    // Accede a la lista de cosmetólogos dentro del objeto JSON
     List<dynamic> cosmetologosData = jsonData['cosmetologos'];
 
-    // Mapea cada objeto JSON a un objeto Cosmetologo
     List<Cosmetologo> cosmetologos = cosmetologosData.map((json) {
       return Cosmetologo.fromJson(json);
     }).toList();
@@ -40,8 +21,6 @@ Future<List<Cosmetologo>> fetchPostsCosmetologo() async {
   }
 }
 
-
-
 class ListarCosmetologos extends StatefulWidget {
   const ListarCosmetologos({super.key});
 
@@ -50,42 +29,54 @@ class ListarCosmetologos extends StatefulWidget {
 }
 
 class _ListarCosmetologosState extends State<ListarCosmetologos> {
-  int i = 1;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Lista de Cosmetólogos.'),
+        title: const Text('Lista de Cosmetólogos'),
       ),
       body: FutureBuilder(
-        future: fetchPostsCosmetologo(), 
-        builder: (context, snapshot){
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const CircularProgressIndicator();
-          } else if (snapshot.hasError){
-            return Text(
-              'Error: ${snapshot.error}' 
-            );
-          } else {
-            List<Cosmetologo> cosmetologos = snapshot.data as List <Cosmetologo>;
-            return ListView.builder(
-              itemCount: cosmetologos.length,
-              itemBuilder: (context, index) {
-                return ListTile(
-                  leading: Text('${i++}'),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(cosmetologos[index].nombre),
-                      Text(cosmetologos[index].avatar),
-                    ],
-                  ),
-                );
-              },
-            );
-          }
-        }
-     ),
+          future: fetchPostsCosmetologo(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (snapshot.hasError) {
+              return Text('Error: ${snapshot.error}');
+            } else {
+              List<Cosmetologo> cosmetologos =
+                  snapshot.data as List<Cosmetologo>;
+              return ListaWidgets(cosmetologos: cosmetologos);
+            }
+          }),
+    );
+  }
+}
+
+class ListaWidgets extends StatelessWidget {
+  const ListaWidgets({
+    super.key,
+    required this.cosmetologos,
+  });
+
+  final List<Cosmetologo> cosmetologos;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      itemCount: cosmetologos.length,
+      itemBuilder: (context, index) {
+        final cosmetologo = cosmetologos[index];
+
+        return ListTile(
+          onTap: () {
+            Navigator.pushNamed(context, "details",
+                arguments: {'cosmetologo': cosmetologo});
+          },
+          title: Text(cosmetologo.nombre),
+          leading:
+              CircleAvatar(backgroundImage: NetworkImage(cosmetologo.avatar)),
+        );
+      },
     );
   }
 }

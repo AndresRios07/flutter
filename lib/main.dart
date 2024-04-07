@@ -1,3 +1,4 @@
+import 'package:consumir_api/screens/detalle_cosmetologo.dart';
 import 'package:consumir_api/screens/listar_cosmetologos.dart';
 import 'package:flutter/material.dart';
 
@@ -8,7 +9,6 @@ void main() {
 class Main extends StatefulWidget {
   const Main({super.key});
 
-  //Crea el estado del widget
   @override
   State<Main> createState() => _MainState();
 }
@@ -16,11 +16,14 @@ class Main extends StatefulWidget {
 class _MainState extends State<Main> {
   @override
   Widget build(BuildContext context) {
-    //Devuelve un materialapp
-    return const MaterialApp(
+    
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: ListarCosmetologos(),
-      // home: ListarHorarios())
+	  initialRoute: "home",
+	  routes: {
+		"home": (context) => ListarCosmetologos(),
+		"details": (context) => DetalleCosmetologo(),
+	  },
     );
   }
 }
